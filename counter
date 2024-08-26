@@ -1,0 +1,48 @@
+import React, { useCallback, useRef, useState } from "react";
+const useCounter = ({ initialValue }: { initialValue: number }) => {
+  const [value, setValue] = useState<number>(() => initialValue);
+
+  const [isRunning, setRunning] = useState<boolean>(false);
+  const ref = useRef<null | ReturnType<typeof setInterval>>(null);
+  const reset = useCallback(() => {
+    setValue(initialValue);
+    stop();
+  }, [initialValue]);
+  const stop = useCallback(() => {
+    setRunning(false);
+    clearInterval(ref.current);
+  }, []);
+  const start = useCallback(() => {
+    setRunning(true);
+    ref.current = setInterval(() => {
+      setValue((prev) => prev + 1);
+    }, 1000);
+  }, []);
+
+  return { reset, start, value, stop, isRunning };
+};
+function Counter() {
+  const initialValue = 0;
+  const { value, reset, start, stop, isRunning } = useCounter({
+    initialValue,
+  });
+  return (
+    <div>
+      <span>{value}</span>
+      <div>
+        {isRunning ? (
+          <>
+            <button onClick={stop}>Pause</button>
+          </>
+        ) : (
+          <>
+            {value > initialValue && <button onClick={reset}>Reset</button>}
+            <button onClick={start}>Start</button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default Counter;
